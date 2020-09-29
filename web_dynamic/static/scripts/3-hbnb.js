@@ -1,59 +1,40 @@
-$(function () {
-    const amenitiesList = [];
-    $('input[type=checkbox]').prop('checked', false);
+$(document).ready(init);
 
-    $('.amenities h4').css({
-	width: '100%',
-	height: '100%',
-	'white-space': 'nowrap',
-	overflow: 'hidden',
-	'text-overflow': 'ellipsis',
-	'padding-bottom': '16px'
-    });
+function init () {
+  const ListAmenity = {};
+  $('.amenities .popover input').change(function () {
+    if ($(this).is(':checked')) {
+      ListAmenity[$(this).attr('data-name')] = $(this).attr('data-id');
+    } else if ($(this).is(':not(:checked)')) {
+      delete ListAmenity[$(this).attr('data-name')];
+    }
+    const names = Object.keys(ListAmenity);
+    $('.amenities h4').text(names.sort().join(', '));
+  });
 
-    $('input[type="checkbox"]').click(function () {
-	const $checkbox = $(this);
-	if ($checkbox.prop('checked') === true) {
-	  amenitiesList.push($checkbox.data('name'));
-	} else {
-	  amenitiesList.forEach((elemt, index) => {
-	    if (elemt === $checkbox.data('name')) { amenitiesList.splice(index, 1); }
-	    });
-	}
-	$('.amenities h4').text(amenitiesList.join(', '));
-    });
-});
+  // Task 3 - API status
 
-/* code for task 3 */
-$(document).ready(function () {
-    $.get('http://localhost:5001/api/v1/status/', function (data) {
-	if (data.status === 'OK') {
-	    $('div#api_status').addClass('available');
-	}
-    }).fail(function () {
-	$('div#api_status').removeClass('available');
-    });
-});
+  const url = 'http://0.0.0.0:5001/api/v1/status/';
+  $get(url, function (data, status) {
+    console.log(data);
+    if (data.status === 'OK') {
+      $('DIV#api_status').addClass('available');
+    } else {
+      $('DIV#api_status').removeClass('available');
+    }
+  });
 
-/* code for task 4 */
-$(function () {
-    $.ajax({
-	type: 'POST',
-	url: 'http://localhost:5001/api/v1/places_search/',
-	contentType: 'application/json',
-	data: '{}',
-	dataType: 'json',
-	success: function (data) {
-	    data.forEach(function (place) {
-		$('section.places').append('<article><div class="title_box"><h2>' +
-		place.name + '</h2><div class="price_by_night">$' +
-		place.price_by_night +
-		'</div></div><div class="information"><div class="max_guest">' +
-		place.max_guest + '</div><div class="number_rooms">' +
-		place.number_rooms + '</div><div class="number_bathrooms">' +
-		place.number_bathrooms +
-		'</div></div><div class="description">' + place.description + '</div></article>');
-	    });
-	}
-    });
-});
+  $.ajax({
+    type: 'POST',
+    url: 'http://0.0.0.0:5001/api/v1/places_search',
+    data: '{}',
+    dataType: 'json',
+    contentType: 'application/json',
+    success: function (data) {
+      for (let i = 0; i < data.length; i++) {
+        const place = data[i];
+        $('.places ').append('<article><h2>' + place.name + '</h2><div class="price_by_night"><p>$' + place.price_by_night + '</p></div><div class="information"><div class="max_guest"><div class="guest_image"></div><p>' + place.max_guest + '</p></div><div class="number_rooms"><div class="bed_image"></div><p>' + place.number_rooms + '</p></div><div class="number_bathrooms"><div class="bath_image"></div><p>' + place.number_bathrooms + '</p></div></div><div class="description"><p>' + place.description + '</p></div></article>');
+      }
+    }
+  });
+}
